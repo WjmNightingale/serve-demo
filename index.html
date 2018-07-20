@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,23 +9,38 @@
     <link rel="stylesheet" href="normalize.css">
     <title>首页</title>
 </head>
+
 <body>
     <p>这是首页</p>
     <button id="getStory">点我获取故事</button>
+    <div class="page">
+    </div>
     <script>
         var button = document.getElementById('getStory')
-        button.addEventListener('click',() => {
-            getJSON('http://localhost:8080/story.json').then((data) => {
-                console.log(data.legend.data[0])
-                return getJSON(data.legend.data[0])
-            }).then((legend1) => {
-                console.log('Got legend 1',legend1)
+        button.addEventListener('click', () => {
+            getJSON('http://localhost:8080/story.json').then((story) => {
+                addHeadingToPage(story.heading)
+                return story.chapterUrls.reduce((sequence,chapterUrl) => {
+                    // Once the last chapter's promise id done ...
+                    return sequence.then(() => {
+                        // ...fetch the next chapter
+                        return getJSON(chapterUrl)
+                    }).then((chapter) => {
+                        addChapterToPage(chapter.object.data)
+                    })
+                },Promise.resolve())
+            }).then(() => {
+                // And we're all done
+               console.log('All done!')
+            }).catch((err) => {
+                console.log('One chapter is failed' + err)
             })
         })
+
         function get(url) {
-            return new Promise((resolve,reject) => {
+            return new Promise((resolve, reject) => {
                 var req = new XMLHttpRequest()
-                req.open('GET',url)
+                req.open('GET', url)
                 req.onload = () => {
                     if (req.status === 200) {
                         resolve(req.response)
@@ -38,41 +54,124 @@
                 req.send()
             })
         }
+
         function getJSON(url) {
-            return get(url).then(JSON.parse)
+            return get(url).then(JSON.parse).catch(function (err) {
+                console.log('getJSON failed for', url, err)
+                throw err
+            })
+        }
+
+        function addHeadingToPage(heading) {
+            var page = document.querySelector('.page')
+            var h2 = document.createElement('h2')
+            h2.textContent = heading
+            page.appendChild(h2)
+        }
+
+        function addChapterToPage(chapterContent) {
+            var page = document.querySelector('.page')
+            var p = document.createElement('p')
+            p.textContent = chapterContent
+            page.appendChild(p)
         }
     </script>
     <script>
-        asyncThing1().then(function() {
+        asyncThing1().then(function () {
             return asyncThing2()
-        }).then(function() {
+        }).then(function () {
             return asyncThing3()
-        }).catch(function(error) {
+        }).catch(function (error) {
             return asyncRecovery1()
-        }).then(function() {
+        }).then(function () {
             return asyncThing4()
-        },function(error) {
+        }, function (error) {
             return asyncRecovery2()
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.log("Do not worry about it")
-        }).then(function() {
+        }).then(function () {
             console.log("All done")
         })
 
-        var jsonPromise = new Promise(function(resolve,reject) {
+        var jsonPromise = new Promise(function (resolve, reject) {
             // JSON.parse throws an error if you feed it some
             // invalid JSON so this implicitly rejects
-            resolve(JSON.parse("This ain't JSON")) 
+            resolve(JSON.parse("This ain't JSON"))
         })
-        jsonPromise.then(function(data) {
+        jsonPromise.then(function (data) {
             // this never happens
-            console.log("It worked!",data)
-        }).catch(function(err) {
+            console.log("It worked!", data)
+        }).catch(function (err) {
             // Instead this happens
-            console.log("It failed",err)
+            console.log("It failed", err)
         })
 
-        
+        // Promise回调中处理错误
+        getJSON('story.json').then(function (story) {
+            return getJSON(story.chapterUrls[0])
+        }).then(function (chapter1) {
+            addHtmlToPage(chapter1.html)
+        }).catch(function () {
+            addTextToPage("Failed to show chapter")
+        }).then(function () {
+            document.querySelector(".spinner").style.display = 'none'
+        })
+
+
+        // 获取所有章节 同步 try catch
+        {
+            try {
+                var story = getJSONSync('story.json')
+                addHtmlToPage(story.heading)
+                story.chapterUrls.forEach((chapterUrl) => {
+                    var chapter = getJSONSync(chapterUrl)
+                    addHtmlToPage(chapter.html)
+                })
+                addTextToPage("All Done")
+            } catch (error) {
+                addTextToPage("broken: " + error.message)
+            }
+            document.querySelector('.spinner').style.display = 'none'
+        }
+
+        // Promise 异步获取所有章节
+        {
+            getJSON('story.json').then(function(story) {
+                addHtmlToPage(story.heading)
+                // TODO: for each url in story.chapterUrls, fetch &amp;display
+                // forEach 是同步的，所以不能用来获取按照顺序下载的chapter
+                // 我们要将 chapterUrls 数组转换为 promise 序列
+                var sequence = Promise.resolve()
+                // Loop through our chapter urls
+                story.chapterUrls.forEach(function(chapterUrl) {
+                    // Add these actions to the end of the sequence
+                    sequence = sequence.then(() => {
+                        return getJSON(chapterUrl)
+                    }).then((chapter) => {
+                        addHtmlToPage(chapter.html)
+                    })
+                })
+
+                story.chapterUrls.reduce((sequence,chapterUrl) => {
+                    // Add these actions to the end of the sequence
+                    return sequence.then(function() {
+                        return getJSON(chapterUrl)
+                    }).then((chapter) => {
+                        addHtmlToPage(chapter.html)
+                    })
+                },Promise.resolve())
+            }).then(function() {
+                // And we're all done
+                addTextToPage('All done')
+            }).catch(function(err) {
+                // Catch any error that happened along the way
+                addTextToPage('Broken: ' + err.message)
+            }).then(function() {
+                // Always hide the spinner
+                document.querySelector('.spinner').style.display = 'none'
+            })
+        }
     </script>
 </body>
+
 </html>

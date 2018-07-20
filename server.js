@@ -34,39 +34,43 @@ var server = http.createServer(function (req, res) {
                 hash[key] = value
             }
             var email = hash.sign_in_email || ''
-            var users = JSON.parse(fs.readFileSync('./db/users','utf-8'))
+            var users = JSON.parse(fs.readFileSync('./db/users', 'utf-8'))
             var foundUser
-            for (var i = 0;i < users.length;i++) {
+            for (var i = 0; i < users.length; i++) {
                 if (users[i].email === email) {
                     foundUser = users[i]
                     break
                 }
             }
             if (foundUser) {
-                string = string.replace('__password__',foundUser.password)
+                string = string.replace('__password__', foundUser.password)
             } else {
-                string = string.replace('__password__','我不知道呢')
+                string = string.replace('__password__', '我不知道呢')
             }
             res.statusCode = 200
-            res.setHeader('Content-Type','text/html;charset=utf-8')
+            res.setHeader('Content-Type', 'text/html;charset=utf-8')
             res.write(string)
             res.end()
             break
         case '/sign_up':
             if (method === 'GET') {
-                var string = fs.readFileSync('./sign_up.html','utf-8')
+                var string = fs.readFileSync('./sign_up.html', 'utf-8')
                 res.statusCode = 200
-                res.setHeader('Content-Type','text/html;charset=utf-8')
+                res.setHeader('Content-Type', 'text/html;charset=utf-8')
                 res.write(string)
                 res.end()
             } else if (method === 'POST') {
                 readBody(req).then((body) => {
                     var data = body.split('&')
                     var hash = createHash(data)
-                    var {email,password,password_confirmation} = hash
+                    var {
+                        email,
+                        password,
+                        password_confirmation
+                    } = hash
                     if (email.indexOf('@') === -1) {
                         res.statusCode = 400
-                        res.setHeader('Content-Type','application/json;charset=utf-8')
+                        res.setHeader('Content-Type', 'application/json;charset=utf-8')
                         res.write(`{
                             "errors": {
                                 "email": "email address is invalid"
@@ -76,7 +80,7 @@ var server = http.createServer(function (req, res) {
                     }
                     if (password !== password_confirmation) {
                         res.statusCode = 400
-                        res.setHeader('Content-Type','application/json;charset=utf-8')
+                        res.setHeader('Content-Type', 'application/json;charset=utf-8')
                         res.write({
                             "errors": {
                                 "password": "password and password_conformation not equal!"
@@ -84,16 +88,16 @@ var server = http.createServer(function (req, res) {
                         })
                         res.end()
                     }
-                    var users = JSON.parse(fs.readFileSync('./db/users','utf-8')) || []
+                    var users = JSON.parse(fs.readFileSync('./db/users', 'utf-8')) || []
                     var inUse = false
-                    for (var i = 0;i < users.length;i++) {
+                    for (var i = 0; i < users.length; i++) {
                         if (users[i].email = email) {
                             inUse = true
                             break
                         }
                         if (inUse) {
                             res.statusCode = 400
-                            res.setHeader('Content-Type','application/json;charset=utf-8')
+                            res.setHeader('Content-Type', 'application/json;charset=utf-8')
                             res.write(`{
                                 "errors": {
                                     "email": "${email} has been used"
@@ -106,9 +110,9 @@ var server = http.createServer(function (req, res) {
                                 password: password
                             })
                             var newUsers = JSON.stringify(users)
-                            fs.writeFileSync('./db/users',newUsers)
+                            fs.writeFileSync('./db/users', newUsers)
                             res.statusCode = 200
-                            res.end() 
+                            res.end()
                         }
                     }
                 })
@@ -116,19 +120,22 @@ var server = http.createServer(function (req, res) {
             break
         case '/sign_in':
             if (method === 'GET') {
-                var string = fs.readFileSync('./sign_in.html','utf-8')
+                var string = fs.readFileSync('./sign_in.html', 'utf-8')
                 res.statusCode = 200
-                res.setHeader('Content-Type','text/html;charset=utf-8')
+                res.setHeader('Content-Type', 'text/html;charset=utf-8')
                 res.write(string)
                 res.end()
             } else if (method === 'POST') {
                 readBody(req).then((body) => {
                     var data = body.split('&')
                     var hash = createHash(data)
-                    var {email,password} = hash
-                    var users = JSON.parse(fs.readFileSync('./db/users','utf8')) || []
+                    var {
+                        email,
+                        password
+                    } = hash
+                    var users = JSON.parse(fs.readFileSync('./db/users', 'utf8')) || []
                     var found = false
-                    for (var i = 0;i < user.length;i++) {
+                    for (var i = 0; i < user.length; i++) {
                         if (users[i].email === email && user[i].password === password) {
                             found = true
                             break
@@ -136,11 +143,11 @@ var server = http.createServer(function (req, res) {
                     }
                     if (found) {
                         res.statusCode = 200
-                        res.setHeader('Set-Cookie',`sign_in_email=${email}`)
+                        res.setHeader('Set-Cookie', `sign_in_email=${email}`)
                         res.end()
                     } else {
                         res.statusCode = 401
-                        res.setHeader('Content-Type','application/json;charset=utf-8')
+                        res.setHeader('Content-Type', 'application/json;charset=utf-8')
                         res.write(`{
                             "errors": {
                                 "error": "signUp has been failed"
@@ -153,18 +160,15 @@ var server = http.createServer(function (req, res) {
             break
         case '/story.json':
             res.statusCode = 200
-            res.setHeader('Content-Type','application/json;charset=utf-8')
-            res.setHeader('Access-Control-Allow-Origin','http://10.8.8.42:8080')
+            res.setHeader('Content-Type', 'application/json;charset=utf-8')
+            res.setHeader('Access-Control-Allow-Origin', 'http://10.8.8.42:8080')
             res.write(`{
-                "title": {
-                    "text": "折线图堆叠"
-                },
-                "tooltip": {
-                    "trigger": "axis"
-                },
-                "legend": {
-                    "data": ["http://localhost:8080/test.json","联盟广告","视频广告"]
-                },
+                "heading": "我是故事标题",
+                "chapterUrls": [
+                        "http://localhost:8080/test1.json",
+                        "http://localhost:8080/test2.json",
+                        "http://localhost:8080/test3.json"
+                ],
                 "grid": {
                     "left": "3%",
                     "right": "4%",
@@ -174,21 +178,43 @@ var server = http.createServer(function (req, res) {
             }`)
             res.end()
             break
-        case '/test.json':
+        case '/test1.json':
             res.statusCode = 200
-            res.setHeader('Content-Type','application/json;charset=utf-8')
-            res.setHeader('Access-Control-Allow-Origin','http://10.8.8.42:8080')
+            res.setHeader('Content-Type', 'application/json;charset=utf-8')
+            res.setHeader('Access-Control-Allow-Origin', 'http://10.8.8.42:8080')
             res.write(`{
                 "object": {
-                    "data": ["1","232","456"]
+                    "data": "章节111"
+                }
+            }`)
+            res.end()
+            break
+        case '/test2.json':
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json;charset=utf-8')
+            res.setHeader('Access-Control-Allow-Origin', 'http://10.8.8.42:8080')
+            res.write(`{
+                "object": {
+                    "data": "章节222"
+                }
+            }`)
+            res.end()
+            break
+        case '/test3.json':
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json;charset=utf-8')
+            res.setHeader('Access-Control-Allow-Origin', 'http://10.8.8.42:8080')
+            res.write(`{
+                "object": {
+                    "data": "章节333"
                 }
             }`)
             res.end()
             break
         default:
-            var string = fs.readFileSync('./default.html','utf-8')
+            var string = fs.readFileSync('./default.html', 'utf-8')
             res.statusCode = 404
-            res.setHeader('Content-Type','text/html;charset=utf-8')
+            res.setHeader('Content-Type', 'text/html;charset=utf-8')
             res.write(string)
             res.end()
             break
@@ -198,11 +224,11 @@ server.listen(port)
 console.log('监听 ' + port + ' 成功\n请用在空中转体720度然后用电饭煲打开 http://localhost:' + port)
 
 function readBody(req) {
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve, reject) => {
         var body = []
-        req.on('data',(chunk) => {
+        req.on('data', (chunk) => {
             body.push(chunk)
-        }).on('end',() => {
+        }).on('end', () => {
             body = Buffer.concat(body).toString()
             resolve(body)
         })

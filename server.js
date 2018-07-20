@@ -24,19 +24,19 @@ var server = http.createServer(function (req, res) {
     console.log('http请求路径?解析出来的参数', queryString)
     switch (path) {
         case '/':
-            let string = fs.readFileSync('./index.html', 'utf-8')
-            let cookies = req.headers.cookie.split(';')
-            let hash = {}
-            for (let i = 0; i < cookies.length; i++) {
-                let parts = cookies[i].split('=')
-                let key = parts[0]
-                let value = parts[1]
+            var string = fs.readFileSync('./index.html', 'utf-8')
+            var cookies = req.headers.cookie.split(';')
+            var hash = {}
+            for (var i = 0; i < cookies.length; i++) {
+                var parts = cookies[i].split('=')
+                var key = parts[0]
+                var value = parts[1]
                 hash[key] = value
             }
-            let email = hash.sign_in_email || ''
-            let users = JSON.parse(fs.readFileSync('./db/users','utf-8'))
-            let foundUser
-            for (let i = 0;i < users.length;i++) {
+            var email = hash.sign_in_email || ''
+            var users = JSON.parse(fs.readFileSync('./db/users','utf-8'))
+            var foundUser
+            for (var i = 0;i < users.length;i++) {
                 if (users[i].email === email) {
                     foundUser = users[i]
                     break
@@ -54,16 +54,16 @@ var server = http.createServer(function (req, res) {
             break
         case '/sign_up':
             if (method === 'GET') {
-                let string = fs.readFileSync('./sign_up.html','utf-8')
+                var string = fs.readFileSync('./sign_up.html','utf-8')
                 res.statusCode = 200
                 res.setHeader('Content-Type','text/html;charset=utf-8')
                 res.write(string)
                 res.end()
             } else if (method === 'POST') {
                 readBody(req).then((body) => {
-                    let data = body.split('&')
-                    let hash = createHash(data)
-                    let {email,password,password_confirmation} = hash
+                    var data = body.split('&')
+                    var hash = createHash(data)
+                    var {email,password,password_confirmation} = hash
                     if (email.indexOf('@') === -1) {
                         res.statusCode = 400
                         res.setHeader('Content-Type','application/json;charset=utf-8')
@@ -84,9 +84,9 @@ var server = http.createServer(function (req, res) {
                         })
                         res.end()
                     }
-                    let users = JSON.parse(fs.readFileSync('./db/users','utf-8')) || []
-                    let inUse = false
-                    for (let i = 0;i < users.length;i++) {
+                    var users = JSON.parse(fs.readFileSync('./db/users','utf-8')) || []
+                    var inUse = false
+                    for (var i = 0;i < users.length;i++) {
                         if (users[i].email = email) {
                             inUse = true
                             break
@@ -105,7 +105,7 @@ var server = http.createServer(function (req, res) {
                                 email: email,
                                 password: password
                             })
-                            let newUsers = JSON.stringify(users)
+                            var newUsers = JSON.stringify(users)
                             fs.writeFileSync('./db/users',newUsers)
                             res.statusCode = 200
                             res.end() 
@@ -116,19 +116,19 @@ var server = http.createServer(function (req, res) {
             break
         case '/sign_in':
             if (method === 'GET') {
-                let string = fs.readFileSync('./sign_in.html','utf-8')
+                var string = fs.readFileSync('./sign_in.html','utf-8')
                 res.statusCode = 200
                 res.setHeader('Content-Type','text/html;charset=utf-8')
                 res.write(string)
                 res.end()
             } else if (method === 'POST') {
                 readBody(req).then((body) => {
-                    let data = body.split('&')
-                    let hash = createHash(data)
-                    let {email,password} = hash
-                    let users = JSON.parse(fs.readFileSync('./db/users','utf8')) || []
-                    let found = false
-                    for (let i = 0;i < user.length;i++) {
+                    var data = body.split('&')
+                    var hash = createHash(data)
+                    var {email,password} = hash
+                    var users = JSON.parse(fs.readFileSync('./db/users','utf8')) || []
+                    var found = false
+                    for (var i = 0;i < user.length;i++) {
                         if (users[i].email === email && user[i].password === password) {
                             found = true
                             break
@@ -153,33 +153,53 @@ var server = http.createServer(function (req, res) {
             break
         case '/story.json':
             res.statusCode = 200
-            res.setHeader('Content-Type','text/json;charset=utf-8')
+            res.setHeader('Content-Type','application/json;charset=utf-8')
+            res.setHeader('Access-Control-Allow-Origin','http://10.8.8.42:8080')
             res.write(`{
-                "story": {
-                    "chapter": {
-                        "title": [
-                            'title1',
-                            'title2',
-                            'title3'
-                        ],
-                        "chapterUrls": [
-                            'http://story.pro/story/chapter1',
-                            'http://story.pro/story/chapter2',
-                            'http://story.pro/story/chapter3',
-                        ]
-                    }
+                "title": {
+                    "text": "折线图堆叠"
+                },
+                "tooltip": {
+                    "trigger": "axis"
+                },
+                "legend": {
+                    "data": ["http://localhost:8080/test.json","联盟广告","视频广告"]
+                },
+                "grid": {
+                    "left": "3%",
+                    "right": "4%",
+                    "bottom": "5%",
+                    "containLabel": true
+                }
+            }`)
+            res.end()
+            break
+        case '/test.json':
+            res.statusCode = 200
+            res.setHeader('Content-Type','application/json;charset=utf-8')
+            res.setHeader('Access-Control-Allow-Origin','http://10.8.8.42:8080')
+            res.write(`{
+                "object": {
+                    "data": ["1","232","456"]
                 }
             }`)
             res.end()
             break
         default:
+            var string = fs.readFileSync('./default.html','utf-8')
+            res.statusCode = 404
+            res.setHeader('Content-Type','text/html;charset=utf-8')
+            res.write(string)
+            res.end()
             break
     }
 })
+server.listen(port)
+console.log('监听 ' + port + ' 成功\n请用在空中转体720度然后用电饭煲打开 http://localhost:' + port)
 
 function readBody(req) {
     return new Promise((resolve,reject) => {
-        let body = []
+        var body = []
         req.on('data',(chunk) => {
             body.push(chunk)
         }).on('end',() => {
@@ -190,11 +210,11 @@ function readBody(req) {
 }
 
 function createHash(array) {
-    let obj = {}
+    var obj = {}
     array.forEach((item) => {
-        let parts = item.split('=')
-        let key = parts[0]
-        let value = parts[1]
+        var parts = item.split('=')
+        var key = parts[0]
+        var value = parts[1]
         obj[key] = decodeURIComponent(value)
     })
     return obj

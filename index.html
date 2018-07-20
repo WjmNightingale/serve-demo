@@ -20,15 +20,26 @@
         button.addEventListener('click', () => {
             getJSON('http://localhost:8080/story.json').then((story) => {
                 addHeadingToPage(story.heading)
-                return story.chapterUrls.reduce((sequence,chapterUrl) => {
-                    // Once the last chapter's promise id done ...
-                    return sequence.then(() => {
-                        // ...fetch the next chapter
-                        return getJSON(chapterUrl)
-                    }).then((chapter) => {
+                // return story.chapterUrls.reduce((sequence,chapterUrl) => {
+                //     // Once the last chapter's promise id done ...
+                //     return sequence.then(() => {
+                //         // ...fetch the next chapter
+                //         return getJSON(chapterUrl)
+                //     }).then((chapter) => {
+                //         addChapterToPage(chapter.object.data)
+                //     })
+                // },Promise.resolve())
+                return Promise.all(
+                    // Map our array of chapters to 
+                    // an array of chapter json promise
+                    story.chapterUrls.map(getJSON)
+                ).then((chapters) => {
+                    // Now we have the chapters json in order Loop through
+                    chapters.forEach((chapter) => {
+                        console.log(typeof chapter)
                         addChapterToPage(chapter.object.data)
                     })
-                },Promise.resolve())
+                })
             }).then(() => {
                 // And we're all done
                console.log('All done!')

@@ -1,20 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
     <title>登陆页面</title>
 </head>
+
 <body>
     <p>这是登陆页面</p>
+    <form id="signIn">
+        <div class="row">
+            <label for="email">邮箱</label>
+            <input type="email" name="email" id="email">
+            <span class="error"></span>
+        </div>
+        <div class="row">
+            <label for="password">密码</label>
+            <input type="password" name="password" id="password">
+            <span class="error"></span>
+        </div>
+        <div class="row">
+            <input type="submit" value="注册">
+        </div>
+        <span class="error"></span>
+    </form>
     <script>
-        function *addGenerator() {
-            var i = 0
-            while(true) {
-                i += yield i
+        var $form = $('#signIn')
+        $form.on('submit', (e) => {
+            e.preventDefault()
+            var need = ['email', 'password']
+            var hash = {}
+            need.forEach((key) => {
+                var value = $form.find(`[name="${key}"]`).val()
+                hash[key] = value
+            })
+            $form.find('.error').each((index, span) => {
+                $(span).text('')
+            })
+            if (hash['email'] === '') {
+                $form.find('[name="email"]').siblings('.error').text('填邮箱啊同学')
+                return
             }
-        }
+            if (hash['password'] === '') {
+                $form.find('[name="password"]').siblings('.error').text('填密码啊同学')
+                return
+            }
+            $.post('/sign_in',hash)
+                .then((response) => {
+                    window.location.href = '/index.html'
+                },(error) => {
+                    console.log(error)
+                    $form.find('.row:nth-last-child').siblings('.error').text('邮箱与密码不匹配！')
+                })
+        })
     </script>
 </body>
+
 </html>

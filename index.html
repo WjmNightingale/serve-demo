@@ -18,7 +18,7 @@
     <script>
         var button = document.getElementById('getStory')
         button.addEventListener('click', () => {
-            getJSON('http://localhost:8080/story.json').then((story) => {
+            getJSON('http://localhost:8888/story.json').then((story) => {
                 addHeadingToPage(story.heading)
                 // return story.chapterUrls.reduce((sequence,chapterUrl) => {
                 //     // Once the last chapter's promise id done ...
@@ -29,17 +29,34 @@
                 //         addChapterToPage(chapter.object.data)
                 //     })
                 // },Promise.resolve())
-                return Promise.all(
-                    // Map our array of chapters to 
-                    // an array of chapter json promise
-                    story.chapterUrls.map(getJSON)
-                ).then((chapters) => {
-                    // Now we have the chapters json in order Loop through
-                    chapters.forEach((chapter) => {
-                        console.log(typeof chapter)
-                        addChapterToPage(chapter.object.data)
-                    })
-                })
+
+                // 用Promise.all()一次发起多个请求下载
+                // return Promise.all(
+                //     // Map our array of chapters to 
+                //     // an array of chapter json promise
+                //     story.chapterUrls.map(getJSON)
+                // ).then((chapters) => {
+                //     // Now we have the chapters json in order Loop through
+                //     chapters.forEach((chapter) => {
+                //         console.log(typeof chapter)
+                //         addChapterToPage(chapter.object.data)
+                //     })
+                // })
+
+                // 用JSON获取所有章节 然后创建一个向文档添加章节的顺序
+                return story.chapterUrls.map(getJSON)
+                    .reduce((sequence,chapterPromise) => {
+                        // Use reduce to chain the promise together
+                        // adding content to the page for each chapter
+                        return sequence.then(() => {
+                            // Wait for everything in the sequence so far
+                            // then wait for this chapter to arrive
+                            return chapterPromise
+                        }).then((chapter) => {
+                            console.log(chapter)
+                            addChapterToPage(chapter.object.data)
+                        })
+                    },Promise.resolve())
             }).then(() => {
                 // And we're all done
                console.log('All done!')

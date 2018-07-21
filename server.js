@@ -51,7 +51,7 @@ var server = http.createServer(function (req, res) {
             res.setHeader('Content-Type', 'text/html;charset=utf-8')
             res.write(string)
             res.end()
-            break
+            break;
         case '/sign_up':
             if (method === 'GET') {
                 var string = fs.readFileSync('./sign_up.html', 'utf-8')
@@ -117,7 +117,7 @@ var server = http.createServer(function (req, res) {
                     }
                 })
             }
-            break
+            break;
         case '/sign_in':
             if (method === 'GET') {
                 var string = fs.readFileSync('./sign_in.html', 'utf-8')
@@ -161,13 +161,13 @@ var server = http.createServer(function (req, res) {
         case '/story.json':
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json;charset=utf-8')
-            res.setHeader('Access-Control-Allow-Origin', 'http://10.8.8.42:8080')
+            res.setHeader('Access-Control-Allow-Origin', '*')
             res.write(`{
                 "heading": "我是故事标题",
                 "chapterUrls": [
-                        "http://localhost:8080/test1.json",
-                        "http://localhost:8080/test2.json",
-                        "http://localhost:8080/test3.json"
+                        "http://localhost:8888/test1.json",
+                        "http://localhost:8888/test2.json",
+                        "http://localhost:8888/test3.json"
                 ],
                 "grid": {
                     "left": "3%",
@@ -181,10 +181,10 @@ var server = http.createServer(function (req, res) {
         case '/test1.json':
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json;charset=utf-8')
-            res.setHeader('Access-Control-Allow-Origin', 'http://10.8.8.42:8080')
+            res.setHeader('Access-Control-Allow-Origin', '*')
             res.write(`{
                 "object": {
-                    "data": "章节111"
+                    "data": "商博良？女人愣了一下，立刻回复了满是媚意春情的笑容，我们这里来来往往都是客人，风尘女子，恩客薄情，都是叫张公子李公子，有几个告诉我们真名哟？客人，你还真有意思，到楼子里来，不搂姑娘，却问个男人的名字。女人偎在我的身边，用丰腴松软的胸脯按摩着我的胳膊，拈起桌上的一枚葡萄放在我嘴边。我凝视着她指尖的豆蔻，艳得单薄而脆弱，像是随时都会剥落的旧漆皮。"
                 }
             }`)
             res.end()
@@ -192,10 +192,10 @@ var server = http.createServer(function (req, res) {
         case '/test2.json':
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json;charset=utf-8')
-            res.setHeader('Access-Control-Allow-Origin', 'http://10.8.8.42:8080')
+            res.setHeader('Access-Control-Allow-Origin', '*')
             res.write(`{
                 "object": {
-                    "data": "章节222"
+                    "data": "雨，已经下了半个月，天像是漏了。高大的乔木在半空里支起深墨色的荫云，荫云外更是低压压的天空。雨滴噼里啪啦打在树叶上、附近的小池塘上，乱得让人心烦。偶尔传来啾啾的鸟叫，顺着看过去，会有一只全身翠绿的鸟儿展开双翅，悄无声息地滑翔进林间的黑暗。天地间唯一的光亮是那堆篝火，马帮的小伙子在篝火边拨弄着他的七弦琴。这样的天气，弦总是湿透的，弹起来嘣嘣作响，倒像是敲着一块中空的朽木。小伙子弹得是云州的调子，荒凉幽寒，丝丝缕缕的颤音。离得很远，一个年轻人坐在雨蓬下，抱着膝盖静静地听，雨蓬上的水滴打在他的睫毛上，他微微闭上眼睛，久久也不睁开。来一口？有人在一旁把烟锅递过去给他。年轻人睁开眼，看见那张焦黄的老脸。他认识那是马帮的帮副祁烈，一个宛州的行商。年轻人笑着摇了摇头：我不抽烟草。走云荒，不靠这口顶着，没准将来有湿病，祁烈也不再劝，自己盘腿坐在了年轻人的身边。"
                 }
             }`)
             res.end()
@@ -203,10 +203,10 @@ var server = http.createServer(function (req, res) {
         case '/test3.json':
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json;charset=utf-8')
-            res.setHeader('Access-Control-Allow-Origin', 'http://10.8.8.42:8080')
+            res.setHeader('Access-Control-Allow-Origin', '*')
             res.write(`{
                 "object": {
-                    "data": "章节333"
+                    "data": "“嘿哟嘿，走山趟海光脚板嘞，遇山踩个山窟窿嘞，遇水就当洗泥脚嘞，撞到天顶不回头嘞！嘿哟嘿！”小黑嘹亮的歌声响彻云霄。马帮中的每个人都面带喜气。本以为这场大雨要下透整个雨季了，谁知道昨夜入睡时还是浓云满天，今天一早起来就看见万道阳光金线般的从云缝中透了下来。天晴是个好兆头，走得不会太辛苦，更不容易迷路。过了这片林子就到了黑泽，黑泽上唯一的村落是黑水铺，是虎山峒的村子，云荒路上的第一站。宛州的行商喜欢和黑水铺的巫民打交道，因为黑水铺算是深入云荒的必经之路，巫民见外人见得多了，也就开化一些，颇有几个会说东陆官话的人。"
                 }
             }`)
             res.end()

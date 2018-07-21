@@ -2,6 +2,7 @@ var http = require('http')
 var fs = require('fs')
 var url = require('url')
 var port = process.argv[2]
+var sessions = {}
 
 if (!port) {
     console.log('似不似傻？\nnode server.js 8080 不会吗')
@@ -27,16 +28,33 @@ var server = http.createServer(function (req, res) {
         case '/index.html':
             var string = fs.readFileSync('./index.html', 'utf-8')
             var cookies = (req.headers.cookie || '').split(';')
+            console.log(cookies)
             var hash = {}
             for (var i = 0; i < cookies.length; i++) {
+                console.log(`第${i}次`)
                 var parts = cookies[i].split('=')
-                var key = parts[0]
-                var value = parts[1]
+                var key = decodeURIComponent(parts[0])
+                console.log(key)
+                var value = decodeURIComponent(parts[1])
+                console.log(value)
                 hash[key] = value
+                console.log(hash)
             }
-            var email = hash.sign_in_email || ''
+            console.log('hash--')
+            console.log(hash['sessionID'])
+            var sessionId = hash['sessionID'] || ''
+            console.log('sessionID---')
+            console.log(sessionId)
             var users = JSON.parse(fs.readFileSync('./db/users', 'utf-8'))
-            var foundUser
+            console.log(sessions)
+            var foundUser,email
+            if (sessionId in sessions) {
+                console.log('sessionId 在 sessions 中')
+                email = sessions[sessionId]
+            } else {
+                email = 'error@qq.com'
+            }
+            console.log(email)
             for (var i = 0; i < users.length; i++) {
                 if (users[i].email === email) {
                     foundUser = users[i]
@@ -164,8 +182,13 @@ var server = http.createServer(function (req, res) {
                         }
                     }
                     if (found) {
+                        console.log('数据库搜索到相应用户')
+                        var sessionId = (Math.random() + '').substring(2)
+                        sessions[sessionId] = email
+                        console.log('sessions---')
+                        console.dir(sessions)
                         res.statusCode = 200
-                        res.setHeader('Set-Cookie', `sign_in_email=${email}`)
+                        res.setHeader('Set-Cookie',`sessionID=${sessionId}`)
                         res.end()
                     } else {
                         res.statusCode = 401

@@ -12,8 +12,13 @@
 
 <body>
     <p>这是首页</p>
-    <button id="getStory">点我获取故事</button>
-    <div class="page">
+    <p>我的密码是---
+        <strong>__password__</strong>
+    </p>
+    <div class="reader" style="display: __display__">
+        <button id="getStory">点我获取故事</button>
+        <div class="page">
+        </div>
     </div>
     <script>
         var button = document.getElementById('getStory')
@@ -45,7 +50,7 @@
 
                 // 用JSON获取所有章节 然后创建一个向文档添加章节的顺序
                 return story.chapterUrls.map(getJSON)
-                    .reduce((sequence,chapterPromise) => {
+                    .reduce((sequence, chapterPromise) => {
                         // Use reduce to chain the promise together
                         // adding content to the page for each chapter
                         return sequence.then(() => {
@@ -56,10 +61,10 @@
                             console.log(chapter)
                             addChapterToPage(chapter.object.data)
                         })
-                    },Promise.resolve())
+                    }, Promise.resolve())
             }).then(() => {
                 // And we're all done
-               console.log('All done!')
+                console.log('All done!')
             }).catch((err) => {
                 console.log('One chapter is failed' + err)
             })
@@ -164,14 +169,14 @@
 
         // Promise 异步获取所有章节
         {
-            getJSON('story.json').then(function(story) {
+            getJSON('story.json').then(function (story) {
                 addHtmlToPage(story.heading)
                 // TODO: for each url in story.chapterUrls, fetch &amp;display
                 // forEach 是同步的，所以不能用来获取按照顺序下载的chapter
                 // 我们要将 chapterUrls 数组转换为 promise 序列
                 var sequence = Promise.resolve()
                 // Loop through our chapter urls
-                story.chapterUrls.forEach(function(chapterUrl) {
+                story.chapterUrls.forEach(function (chapterUrl) {
                     // Add these actions to the end of the sequence
                     sequence = sequence.then(() => {
                         return getJSON(chapterUrl)
@@ -180,21 +185,21 @@
                     })
                 })
 
-                story.chapterUrls.reduce((sequence,chapterUrl) => {
+                story.chapterUrls.reduce((sequence, chapterUrl) => {
                     // Add these actions to the end of the sequence
-                    return sequence.then(function() {
+                    return sequence.then(function () {
                         return getJSON(chapterUrl)
                     }).then((chapter) => {
                         addHtmlToPage(chapter.html)
                     })
-                },Promise.resolve())
-            }).then(function() {
+                }, Promise.resolve())
+            }).then(function () {
                 // And we're all done
                 addTextToPage('All done')
-            }).catch(function(err) {
+            }).catch(function (err) {
                 // Catch any error that happened along the way
                 addTextToPage('Broken: ' + err.message)
-            }).then(function() {
+            }).then(function () {
                 // Always hide the spinner
                 document.querySelector('.spinner').style.display = 'none'
             })

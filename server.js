@@ -24,8 +24,9 @@ var server = http.createServer(function (req, res) {
     console.log('http请求路径?解析出来的参数', queryString)
     switch (path) {
         case '/':
+        case '/index.html':
             var string = fs.readFileSync('./index.html', 'utf-8')
-            var cookies = req.headers.cookie.split(';')
+            var cookies = (req.headers.cookie || '').split(';')
             var hash = {}
             for (var i = 0; i < cookies.length; i++) {
                 var parts = cookies[i].split('=')
@@ -44,14 +45,16 @@ var server = http.createServer(function (req, res) {
             }
             if (foundUser) {
                 string = string.replace('__password__', foundUser.password)
+                string = string.replace('__display__', 'block')
             } else {
                 string = string.replace('__password__', '我不知道呢')
+                string = string.replace('__display__', 'none')
             }
             res.statusCode = 200
             res.setHeader('Content-Type', 'text/html;charset=utf-8')
             res.write(string)
             res.end()
-            break;
+            break
         case '/sign_up':
             if (method === 'GET') {
                 var string = fs.readFileSync('./sign_up.html', 'utf-8')
@@ -60,15 +63,22 @@ var server = http.createServer(function (req, res) {
                 res.write(string)
                 res.end()
             } else if (method === 'POST') {
+                console.log('注册提交数据')
                 readBody(req).then((body) => {
                     var data = body.split('&')
+                    console.log(data)
                     var hash = createHash(data)
                     var {
                         email,
                         password,
                         password_confirmation
                     } = hash
+                    console.log('hash--')
+                    console.log(hash)
+                    console.log('参数--')
+                    console.log(email,password,password_confirmation)
                     if (email.indexOf('@') === -1) {
+                        console.log('邮箱地址不合格')
                         res.statusCode = 400
                         res.setHeader('Content-Type', 'application/json;charset=utf-8')
                         res.write(`{
@@ -79,6 +89,7 @@ var server = http.createServer(function (req, res) {
                         res.end()
                     }
                     if (password !== password_confirmation) {
+                        console.log('密码不一致')
                         res.statusCode = 400
                         res.setHeader('Content-Type', 'application/json;charset=utf-8')
                         res.write({
@@ -90,30 +101,37 @@ var server = http.createServer(function (req, res) {
                     }
                     var users = JSON.parse(fs.readFileSync('./db/users', 'utf-8')) || []
                     var inUse = false
+                    console.log('数据库用户--')
+                    console.log(users)
                     for (var i = 0; i < users.length; i++) {
-                        if (users[i].email = email) {
+                        if (users[i].email === email) {
                             inUse = true
                             break
                         }
-                        if (inUse) {
-                            res.statusCode = 400
-                            res.setHeader('Content-Type', 'application/json;charset=utf-8')
-                            res.write(`{
-                                "errors": {
-                                    "email": "${email} has been used"
-                                }
-                            }`)
-                            res.end()
-                        } else {
-                            users.push({
-                                email: email,
-                                password: password
-                            })
-                            var newUsers = JSON.stringify(users)
-                            fs.writeFileSync('./db/users', newUsers)
-                            res.statusCode = 200
-                            res.end()
-                        }
+                    }
+                    if (inUse) {
+                        console.log('邮箱已经被占用')
+                        res.statusCode = 400
+                        res.setHeader('Content-Type', 'application/json;charset=utf-8')
+                        res.write(`{
+                            "errors": {
+                                "email": "${email} has been used"
+                            }
+                        }`)
+                        res.end()
+                    } else {
+                        console.log('邮箱可以注册')
+                        users.push({
+                            email: email,
+                            password: password
+                        })
+                        var newUsers = JSON.stringify(users)
+                        fs.writeFileSync('./db/users', newUsers)
+                        res.statusCode = 200
+                        res.write(`{
+                            "text": "Success!"
+                        }`)
+                        res.end()
                     }
                 })
             }
@@ -135,8 +153,12 @@ var server = http.createServer(function (req, res) {
                     } = hash
                     var users = JSON.parse(fs.readFileSync('./db/users', 'utf8')) || []
                     var found = false
-                    for (var i = 0; i < user.length; i++) {
-                        if (users[i].email === email && user[i].password === password) {
+                    console.log('参数--')
+                    console.log(email,password)
+                    console.log('用户--')
+                    console.log(users)
+                    for (var i = 0; i < users.length; i++) {
+                        if (users[i].email === email && users[i].password === password) {
                             found = true
                             break
                         }

@@ -50,11 +50,14 @@
             }
             if (hash['password'] === '') {
                 $form.find('[name="password"]').siblings('.error').text('同学填密码啊')
+                return
             }
             if (hash['password'] !== hash['password_confirmation']) {
-                $form.find('[name="password_conformation"]').siblings('.error').text('同学检查啊两次密码不一致')
+                console.log('密码不一致')
+                $form.find('[name="password_confirmation"]').siblings('.error').text('同学检查啊两次密码不一致')
+                return
             }
-            $.post('/sign_up', hahs)
+            $.post('/sign_up', hash)
                 .then((response) => {
                     console.log(response)
                     alert('注册成功')

@@ -188,6 +188,7 @@ var server = http.createServer(function (req, res) {
                         console.log('sessions---')
                         console.dir(sessions)
                         res.statusCode = 200
+                        var cookieString = `sessionId=${sessionId};max-age=`
                         res.setHeader('Set-Cookie',`sessionID=${sessionId}`)
                         res.end()
                     } else {
@@ -254,6 +255,13 @@ var server = http.createServer(function (req, res) {
                     "data": "“嘿哟嘿，走山趟海光脚板嘞，遇山踩个山窟窿嘞，遇水就当洗泥脚嘞，撞到天顶不回头嘞！嘿哟嘿！”小黑嘹亮的歌声响彻云霄。马帮中的每个人都面带喜气。本以为这场大雨要下透整个雨季了，谁知道昨夜入睡时还是浓云满天，今天一早起来就看见万道阳光金线般的从云缝中透了下来。天晴是个好兆头，走得不会太辛苦，更不容易迷路。过了这片林子就到了黑泽，黑泽上唯一的村落是黑水铺，是虎山峒的村子，云荒路上的第一站。宛州的行商喜欢和黑水铺的巫民打交道，因为黑水铺算是深入云荒的必经之路，巫民见外人见得多了，也就开化一些，颇有几个会说东陆官话的人。"
                 }
             }`)
+            res.end()
+            break
+        case '/normalize.css':
+            var string = fs.readFileSync('normalize.css','utf-8')
+            res.statusCode = 200
+            res.setHeader('Content-Type','text/css;charset=utf-8')
+            res.write(string)
             res.end()
             break
         default:

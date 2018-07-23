@@ -6,30 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="normalize.css">
     <title>用户注册</title>
+    <style>
+        .app {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .app .row {
+            display: flex;
+            justify-content: center;
+            margin: 6px 0;
+        }
+    </style>
 </head>
 
 <body>
-    <p>这是注册页面</p>
-    <form id="signUp">
-        <div class="row">
-            <label for="email">邮箱</label>
-            <input type="email" name="email" id="email">
-            <span class="error"></span>
-        </div>
-        <div class="row">
-            <label for="password">密码</label>
-            <input type="password" name="password" id="password">
-            <span class="error"></span>
-        </div>
-        <div class="row">
-            <label for="password_confirmation">确认密码</label>
-            <input type="password" name="password_confirmation" id="password_confirmation">
-            <span class="error"></span>
-        </div>
-        <div class="row">
-            <input type="submit" value="注册">
-        </div>
+    <div class="app">
+        <h1>欢迎注册</h1>
+        <form id="signUp">
+            <div class="row">
+                <label for="email">邮箱</label>
+                <input type="email" name="email" id="email">
+                <span class="error"></span>
+            </div>
+            <div class="row">
+                <label for="password">密码</label>
+                <input type="password" name="password" id="password">
+                <span class="error"></span>
+            </div>
+            <div class="row">
+                <label for="password_confirmation">确认密码</label>
+                <input type="password" name="password_confirmation" id="password_confirmation">
+                <span class="error"></span>
+            </div>
+            <div class="row">
+                <input type="submit" value="注册">
+            </div>
+    </div>
     </form>
     <script>
         let $form = $('#signUp')
